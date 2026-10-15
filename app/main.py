@@ -1,31 +1,24 @@
 import sys
 
-def greet(name: str) -> str:
-    return f"Hello, {name}! welcome to AI engineering."
+from enum import Enum
+from fastapi import FastAPI
 
-def sum(a: int, b:int) -> int:
-    total = a + b
-    return f"The sum of {a} & {b} is {total}"
+app = FastAPI()
 
-def prompt(question: str)-> str:
-    return f"Question: {question}"
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
-def main() -> None:
+@app.get("/items")
+async def read_items(skip: int = 0, limit: int = 10):
+    return fake_items_db[skip : skip + limit]
 
-    if len(sys.argv) > 1:
-
-        message = greet(sys.argv[1])
-
-        if sys.argv[1] == 'sum':
-            message = sum(1, 5)
-
-        if "?" in sys.argv[1]:
-            message = prompt(sys.argv[1])
-
-        print(message)
-
-    else:
-        print("No params found")
-
-if __name__ == "__main__":
-    main()
+@app.get("/items/{item_id}")
+async def read_item(item_id: str, q: str | None = None, short: bool = False):
+    item = {"item_id": item_id}
+    
+    if q:
+        item.update({"q": q})
+    if not short:
+        item.update(
+            {"description": "This is an amazing item that has a long description"}
+        )
+    return item
